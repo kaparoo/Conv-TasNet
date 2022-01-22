@@ -1,0 +1,3 @@
+black >= 21.12b0
+dataclasses-io >= 0.0.3
+tensorflow >= 2.7.0
