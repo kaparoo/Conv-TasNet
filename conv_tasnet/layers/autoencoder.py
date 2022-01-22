@@ -48,10 +48,10 @@ class Decoder(keras.layers.Layer):
         )
 
     def call(self, source_weights: tf.Tensor) -> tf.Tensor:
-        separated_sources = self.decode(source_weights)
+        estimated_sources = self.decode(source_weights)
         if self.num_filters == 1:
-            separated_sources = tf.squeeze(separated_sources, axis=-1)
-        return separated_sources
+            estimated_sources = tf.squeeze(estimated_sources, axis=-1)
+        return estimated_sources
 
     def get_config(self) -> Dict[str, int]:
         return {"num_filters": self.num_filters, "filter_len": self.filter_len}
