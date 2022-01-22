@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from pyexpat import features
 import tensorflow as tf
 import tensorflow.keras as keras
 
@@ -43,8 +44,8 @@ class GlobalLayerNorm(_LayerNormBase):
 
     def call(self, input: tf.Tensor) -> tf.Tensor:
         mean = tf.math.reduce_mean(input, axis=[1, 2], keepdims=True)
-        std = tf.math.reduce_std(input, axis=[1, 2], keepdims=True)
-        return ((input - mean) / (std + _EPS)) * self.gamma + self.beta
+        var = tf.math.reduce_variance(input, axis=[1, 2], keepdims=True)
+        return ((input - mean) / tf.sqrt(var + _EPS)) * self.gamma + self.beta
 
 
 class CumulativeLayerNorm(_LayerNormBase):
@@ -53,6 +54,16 @@ class CumulativeLayerNorm(_LayerNormBase):
 
     def build(self, input_shape: tf.TensorShape):
         super(CumulativeLayerNorm, self).build(input_shape)
+        num_features, num_channels = input_shape[-2:]
+        self.denominators = tf.reshape(
+            num_channels * tf.range(1.0, num_features + 1.0), shape=[1, -1, 1]
+        )
 
     def call(self, input: tf.Tensor) -> tf.Tensor:
-        pass
+        cum_sum = tf.cumsum(tf.reduce_sum(input, axis=-1, keepdims=True), axis=-2)
+        cum_mean = cum_sum / self.denominators
+        cum_square_sum = tf.cumsum(
+            tf.reduce_sum(tf.square(input), axis=-1, keepdims=True), axis=-2
+        )
+        cum_var = cum_square_sum / self.denominators - tf.square(cum_mean)
+        return ((input - cum_mean) / tf.sqrt(cum_var + _EPS)) * self.gamma + self.beta
