@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from conv_tasnet.evaluation import calc_sdr, SDRLoss
+from conv_tasnet.evaluation import calc_sdr, SDRLoss, SDRMetric
 from conv_tasnet.flags import define_flags
 from conv_tasnet.model import make_model
 from conv_tasnet.param import ConvTasNetParam, load_param, make_param
@@ -13,4 +13,5 @@ __all__ = [
     "make_model",
     "make_param",
     "SDRLoss",
+    "SDRMetric",
 ]

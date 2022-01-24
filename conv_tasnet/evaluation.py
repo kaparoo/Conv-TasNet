@@ -6,7 +6,7 @@ import tensorflow.keras as keras
 from typing import Dict
 
 
-__all__ = ["calc_sdr", "SDRLoss"]
+__all__ = ["calc_sdr", "SDRLoss", "SDRMetric"]
 
 
 _COEF = 10 / math.log(10)
@@ -43,3 +43,21 @@ class SDRLoss(keras.losses.Loss):
 
     def get_config(self) -> Dict[str, bool]:
         return {"scale_invariant": self.scale_invariant}
+
+
+class SDRMetric(keras.metrics.Metric):
+    def __init__(self, scale_invariant: bool = False):
+        super(SDRMetric, self).__init__(name="sdr")
+        self.scale_invariant = scale_invariant
+        self.sdr = self.add_weight(name="sdr", initializer="zeros")
+
+    def update_state(self, s_true: tf.Tensor, s_pred: tf.Tensor):
+        self.sdr.assign_add(
+            tf.reduce_mean(calc_sdr(s_true, s_pred, self.scale_invariant))
+        )
+
+    def reset_states(self):
+        self.sdr.assign(0.0)
+
+    def result(self):
+        return self.sdr
