@@ -6,7 +6,7 @@ import tensorflow.keras as keras
 from typing import Dict
 
 
-__all__ = ["SDRLoss"]
+__all__ = ["calc_sdr", "SDRLoss"]
 
 
 _COEF = 10 / math.log(10)
@@ -17,7 +17,7 @@ def _inner_product(u: tf.Tensor, v: tf.Tensor, keepdims: bool = False) -> tf.Ten
     return tf.reduce_sum(tf.multiply(u, v), axis=-1, keepdims=keepdims)
 
 
-def _calc_sdr(
+def calc_sdr(
     s_true: tf.Tensor, s_pred: tf.Tensor, scale_invariant: bool = False
 ) -> tf.Tensor:
     scale = 1.0
@@ -39,7 +39,7 @@ class SDRLoss(keras.losses.Loss):
         self.scale_invariant = scale_invariant
 
     def call(self, s_true: tf.Tensor, s_pred: tf.Tensor) -> tf.Tensor:
-        return -1.0 * _calc_sdr(s_true, s_pred, self.scale_invariant)
+        return -1.0 * calc_sdr(s_true, s_pred, self.scale_invariant)
 
     def get_config(self) -> Dict[str, bool]:
         return {"scale_invariant": self.scale_invariant}
