@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from conv_tasnet.evaluation import SDRLoss
 from conv_tasnet.flags import define_flags
-from conv_tasnet.param import ConvTasNetParam, load_param, make_param
 from conv_tasnet.layers import (
     ConvBlock,
     CumulativeLayerNorm,
@@ -12,6 +12,7 @@ from conv_tasnet.layers import (
     Separator,
 )
 from conv_tasnet.model import make_model
+from conv_tasnet.param import ConvTasNetParam, load_param, make_param
 
 __all__ = [
     "ConvBlock",
@@ -26,4 +27,5 @@ __all__ = [
     "make_param",
     "MaskApplier",
     "Separator",
+    "SDRLoss",
 ]
