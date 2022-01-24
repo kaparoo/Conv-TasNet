@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pyexpat import features
 import tensorflow as tf
 import tensorflow.keras as keras
 
@@ -18,14 +17,14 @@ class _LayerNormBase(keras.layers.Layer):
     def build(self, input_shape: tf.TensorShape):
         self.gamma = self.add_weight(
             name="gamma",
-            shape=input_shape[-1],
+            shape=(input_shape[-1],),
             dtype=tf.float32,
             initializer="glorot_uniform",
             trainable=True,
         )
         self.beta = self.add_weight(
             name="beta",
-            shape=input_shape[-1],
+            shape=(input_shape[-1],),
             dtype=tf.float32,
             initializer="glorot_uniform",
             trainable=True,
