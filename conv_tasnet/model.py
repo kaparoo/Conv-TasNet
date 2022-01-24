@@ -32,7 +32,7 @@ def make_model(param: ConvTasNetParam, name: str = "Conv-TasNet") -> keras.Model
     source_weights = MaskApplier(num_sources=param.C, num_basis=param.N)(
         [mixture_weights, source_masks]
     )
-    estimated_source = Decoder(num_filters=1, filter_len=param.L)(source_weights)
-    model = keras.Model(inputs=input_mixture, outputs=estimated_source, name=name)
+    estimated_sources = Decoder(num_filters=1, filter_len=param.L)(source_weights)
+    model = keras.Model(inputs=input_mixture, outputs=estimated_sources, name=name)
     # model.compile(...)
     return model
