@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import math
+
+import sys
+
 import tensorflow as tf
 import tensorflow.keras as keras
 from typing import Dict
 
+if sys.version_info >= (3, 9):
+    Dict = dict
 
 __all__ = ["calc_sdr", "SDRLoss", "SDRMetric"]
 
@@ -37,7 +42,7 @@ def calc_sdr(
 
 class SDRLoss(keras.losses.Loss):
     def __init__(self, name: str = "sdr", scale_invariant: bool = False):
-        super(SDRLoss, self).__init__(name)
+        super(SDRLoss, self).__init__(name=name)
         self.scale_invariant = scale_invariant
 
     def call(self, s_true: tf.Tensor, s_pred: tf.Tensor) -> tf.Tensor:
@@ -49,7 +54,7 @@ class SDRLoss(keras.losses.Loss):
 
 class SDRMetric(keras.metrics.Metric):
     def __init__(self, name: str = "sdr", scale_invariant: bool = False):
-        super(SDRMetric, self).__init__(name)
+        super(SDRMetric, self).__init__(name=name)
         self.scale_invariant = scale_invariant
         self.sdr = self.add_weight(name="sdr", initializer="zeros")
 

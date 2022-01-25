@@ -8,11 +8,17 @@ import musdb18
 
 from pathlib import Path
 
+import sys
+
 import tensorflow as tf
 import tensorflow.keras as keras
 import tensorflow.keras.callbacks as callbacks
 
 from typing import List, Literal, Optional, Tuple, Union
+
+if sys.version_info >= (3, 9):
+    List = list
+    Tuple = tuple
 
 
 __all__ = [
@@ -25,7 +31,7 @@ __all__ = [
 
 Model = conv_tasnet
 ModelParam = conv_tasnet.ConvTasNetParam
-ModelParamArgs = lambda: {
+ModelParamKWArgs = lambda: {
     "T": _FLAGS.input_length,
     "C": _FLAGS.num_sources,
     "N": _FLAGS.num_filters,
@@ -41,7 +47,7 @@ ModelParamArgs = lambda: {
 
 Dataset = musdb18
 DatasetParam = musdb18.MUSDB18Param
-DatasetParamArgs = lambda: {}
+DatasetParamKWArgs = lambda: {}
 
 _FLAGS = flags.FLAGS
 _CONFIG_FILENAME = "config.json"
@@ -60,7 +66,7 @@ def define_flags(mode: Literal["train", "test"] = "train"):
 
 
 def _initialize_model_param(checkpoint_dir: Path) -> ModelParam:
-    model_param = Model.make_param(ModelParamArgs())
+    model_param = Model.make_param(**ModelParamKWArgs())
     model_param.save(checkpoint_dir / _CONFIG_FILENAME, overwrite=True)
     return model_param
 
@@ -124,7 +130,7 @@ def load_model(
 
 
 def _initialize_dataset_param(checkpoint_dir: Path) -> DatasetParam:
-    dataset_param = Dataset.make_param(DatasetParamArgs())
+    dataset_param = Dataset.make_param(**DatasetParamKWArgs())
     dataset_param.save(checkpoint_dir / _CONFIG_FILENAME, overwrite=True)
     return dataset_param
 

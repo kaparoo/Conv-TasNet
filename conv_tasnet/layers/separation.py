@@ -3,9 +3,16 @@
 from conv_tasnet.layers.normalizations import CumulativeLayerNorm as cLN
 from conv_tasnet.layers.normalizations import GlobalLayerNorm as gLN
 
+import sys
+
 import tensorflow as tf
 import tensorflow.keras as keras
 from typing import Dict, List, Tuple, Union
+
+if sys.version_info >= (3, 9):
+    Dict = dict
+    List = list
+    Tuple = tuple
 
 
 __all__ = ["ConvBlock", "Separator", "MaskApplier"]

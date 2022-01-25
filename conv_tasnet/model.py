@@ -6,6 +6,8 @@ from conv_tasnet.param import ConvTasNetParam
 from conv_tasnet.layers import Decoder, Encoder, MaskApplier, Separator
 from conv_tasnet.evaluation import SDRLoss, SDRMetric
 
+import sys
+
 import tensorflow.keras as keras
 from tensorflow.keras.losses import Loss
 from tensorflow.keras.metrics import Metric
@@ -13,6 +15,8 @@ from tensorflow.keras.optimizers import Adam, Optimizer
 
 from typing import List, Union
 
+if sys.version_info >= (3, 9):
+    List = list
 
 __all__ = ["make_model"]
 

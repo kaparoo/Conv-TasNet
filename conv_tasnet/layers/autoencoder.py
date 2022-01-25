@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import tensorflow as tf
 import tensorflow.keras as keras
 from typing import Any, Dict
+
+if sys.version_info >= (3, 9):
+    Dict = dict
 
 
 __all__ = ["Decoder", "Encoder"]
