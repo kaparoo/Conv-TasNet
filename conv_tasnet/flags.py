@@ -8,6 +8,12 @@ __all__ = ["define_flags"]
 
 def define_flags():
     flags.DEFINE_integer(
+        "input_length", 5676, "Length of inputs", lower_bound=1, short_name="T"
+    )
+    flags.DEFINE_integer(
+        "num_sources", 4, "Number of sources", lower_bound=1, short_name="C"
+    )
+    flags.DEFINE_integer(
         "num_filters",
         512,
         "Number of filters in autoencoder",
