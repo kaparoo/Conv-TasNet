@@ -25,10 +25,11 @@ MetricType = Union[str, Metric, List[Union[str, Metric]]]
 @beartype
 def make_model(
     param: ConvTasNetParam,
-    name: str = "Conv-TasNet",
     optimizer: OptimizerType = Adam(),
     loss: LossType = SDRLoss("sisdr", True),
     metrics: MetricType = ["accuracy", SDRMetric("sisdr", True)],
+    name: str = "Conv-TasNet",
+    compile: bool = True,
     **kwargs
 ) -> keras.Model:
     input_mixture = keras.Input(
@@ -52,5 +53,6 @@ def make_model(
     )
     estimated_sources = Decoder(num_filters=1, filter_len=param.L)(source_weights)
     model = keras.Model(inputs=input_mixture, outputs=estimated_sources, name=name)
-    model.compile(optimizer, loss, metrics, **kwargs)
+    if compile:
+        model.compile(optimizer, loss, metrics, **kwargs)
     return model
