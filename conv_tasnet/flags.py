@@ -3,6 +3,9 @@
 from absl import flags
 
 
+__all__ = ["define_flags"]
+
+
 def define_flags():
     flags.DEFINE_integer(
         "num_filters",
@@ -56,3 +59,4 @@ def define_flags():
     flags.DEFINE_integer(
         "num_repeats", 3, "Number of repeats", lower_bound=1, short_name="R"
     )
+    flags.DEFINE_bool("causal", False, "Causality of model")
