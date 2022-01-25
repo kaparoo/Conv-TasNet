@@ -13,10 +13,12 @@ _COEF = 10 / math.log(10)
 _EPS = 1e-7
 
 
+@tf.function
 def _inner_product(u: tf.Tensor, v: tf.Tensor, keepdims: bool = False) -> tf.Tensor:
     return tf.reduce_sum(tf.multiply(u, v), axis=-1, keepdims=keepdims)
 
 
+@tf.function
 def calc_sdr(
     s_true: tf.Tensor, s_pred: tf.Tensor, scale_invariant: bool = False
 ) -> tf.Tensor:
@@ -34,8 +36,8 @@ def calc_sdr(
 
 
 class SDRLoss(keras.losses.Loss):
-    def __init__(self, scale_invariant: bool = False):
-        super(SDRLoss, self).__init__(name="sdr")
+    def __init__(self, name: str = "sdr", scale_invariant: bool = False):
+        super(SDRLoss, self).__init__(name)
         self.scale_invariant = scale_invariant
 
     def call(self, s_true: tf.Tensor, s_pred: tf.Tensor) -> tf.Tensor:
@@ -46,8 +48,8 @@ class SDRLoss(keras.losses.Loss):
 
 
 class SDRMetric(keras.metrics.Metric):
-    def __init__(self, scale_invariant: bool = False):
-        super(SDRMetric, self).__init__(name="sdr")
+    def __init__(self, name: str = "sdr", scale_invariant: bool = False):
+        super(SDRMetric, self).__init__(name)
         self.scale_invariant = scale_invariant
         self.sdr = self.add_weight(name="sdr", initializer="zeros")
 
