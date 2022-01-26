@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from turtle import begin_fill
 from beartype import beartype
 
 import musdb
@@ -20,21 +19,7 @@ if sys.version_info >= (3, 9):
 __all__ = ["make_dataset"]
 
 
-class Track(object):
-    __slots__ = ["length", "mixture", "sources"]
-
-    def __init__(self, track: musdb.MultiTrack):
-        mixture = track.targets["linear_mixture"]
-        self.mixture = (mixture.audio[:, 0], mixture.audio[:, 1])
-        self.length = self.mixture[0].shape[-1]
-        self.sources = (track.targets[label] for label in MUSDB18.LABELS)
-        self.sources = {
-            label: (source.audio[:, 0], source.audio[:, 1])
-            for label, source in zip(MUSDB18.LABELS, self.sources)
-        }
-
-
-class MUSDB18(object):
+class MUSDB18Provider(object):
 
     LABELS = ["vocals", "drums", "bass", "other"]
 
@@ -58,59 +43,63 @@ class MUSDB18(object):
 
     @beartype
     def generate(self, num_batches: int, is_valid: bool = False):
+        tracks: List[musdb.MultiTrack] = self.tracks if not is_valid else self.valids
+
         batch_size = self.param.batch_size
         sample_length = self.param.sample_length
-
-        tracks = self.tracks if not is_valid else self.valids
         for _ in range(num_batches):
-            mixture = np.zeros([2 * batch_size, sample_length], dtype=np.float32)
-            sources = np.zeros([2 * batch_size, 4, sample_length], dtype=np.float32)
+            x_batch = np.zeros([2 * batch_size, sample_length], dtype=np.float32)
+            y_batch = np.zeros([2 * batch_size, 4, sample_length], dtype=np.float32)
 
             for idx in range(batch_size):
                 idx_l, idx_r = 2 * idx, 2 * idx + 1
 
-                track = Track(random.choice(tracks))
-                start = random.randint(0, track.length - sample_length)
-                end = start + sample_length
-                mixture[idx_l] = track.mixture[0][start:end]
-                mixture[idx_r] = track.mixture[1][start:end]
+                track = random.choice(tracks)
+                track.chunk_duration = sample_length
+                track.chunk_start = random.uniform(
+                    0, track.duration - track.chunk_duration
+                )
 
-                for c, stem in enumerate(MUSDB18.LABELS):
-                    sources[idx_l][c] = track.sources[stem][0][start:end]
-                    sources[idx_r][c] = track.sources[stem][1][start:end]
+                mixture = track.targets["linear_mixture"].audio
+                sources = {label: track.targets[label].audio for label in self.LABELS}
 
-    def make_dataset(self) -> Tuple[tf.data.Dataset, Union[tf.data.Dataset, None]]:
-        param = self.param
+                x_batch[idx_l] = mixture[:, 0]
+                x_batch[idx_r] = mixture[:, 1]
+                for c, label in enumerate(self.LABELS):
+                    y_batch[idx_l][c] = sources[label][:, 0]
+                    y_batch[idx_r][c] = sources[label][:, 1]
 
-        output_types = (tf.float32, tf.float32)
-        output_shapes = (
-            tf.TensorShape([2 * param.batch_size, param.sample_length]),
-            tf.TensorShape([2 * param.batch_size, 4, param.sample_length]),
-        )
-
-        if self.num_valids != 0:
-            valid_batches = int(param.validation_split * param.num_batches)
-            valid_dataset = tf.data.Dataset.from_generator(
-                lambda: self.generate(valid_batches, is_valid=True),
-                output_types=output_types,
-                output_shapes=output_shapes,
-            )
-        else:
-            valid_batches = 0
-            valid_dataset = None
-
-        track_batches = param.num_batches - valid_batches
-        track_dataset = tf.data.Dataset.from_generator(
-            lambda: self.generate(track_batches, is_valid=False),
-            output_types=output_types,
-            output_shapes=output_shapes,
-        )
-
-        return track_dataset, valid_dataset
+            yield x_batch, y_batch
 
 
 @beartype
 def make_dataset(
     param: MUSDB18Param, mode: Literal["train", "test"] = "train"
 ) -> Tuple[tf.data.Dataset, Union[tf.data.Dataset, None]]:
-    return MUSDB18(param, mode).make_dataset()
+    provider = MUSDB18Provider(param, mode)
+
+    output_types = (tf.float32, tf.float32)
+    output_shapes = (
+        tf.TensorShape([2 * param.batch_size, param.sample_length]),
+        tf.TensorShape([2 * param.batch_size, 4, param.sample_length]),
+    )
+
+    if provider.num_valids != 0:
+        valid_batches = int(param.validation_split * param.num_batches)
+        valid_dataset = tf.data.Dataset.from_generator(
+            lambda: provider.generate(valid_batches, is_valid=True),
+            output_types=output_types,
+            output_shapes=output_shapes,
+        )
+    else:
+        valid_batches = 0
+        valid_dataset = None
+
+    track_batches = param.num_batches - valid_batches
+    track_dataset = tf.data.Dataset.from_generator(
+        lambda: provider.generate(track_batches, is_valid=False),
+        output_types=output_types,
+        output_shapes=output_shapes,
+    )
+
+    return track_dataset, valid_dataset
