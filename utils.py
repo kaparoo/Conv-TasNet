@@ -74,7 +74,7 @@ def define_flags(mode: Literal["train", "test"] = "train"):
 
 def _initialize_model_param(checkpoint_dir: Path) -> ModelParam:
     model_param = Model.make_param(**ModelParamKWArgs())
-    model_param.save(checkpoint_dir / _CONFIG_FILENAME, overwrite=True)
+    model_param.save(checkpoint_dir / _CONFIG_FILENAME, overwrite=False)
     return model_param
 
 
@@ -138,7 +138,7 @@ def load_model(
 
 def _initialize_dataset_param(checkpoint_dir: Path) -> DatasetParam:
     dataset_param = Dataset.make_param(**DatasetParamKWArgs())
-    dataset_param.save(checkpoint_dir / _CONFIG_FILENAME, overwrite=True)
+    dataset_param.save(checkpoint_dir / _CONFIG_FILENAME, overwrite=False)
     return dataset_param
 
 
