@@ -47,7 +47,12 @@ ModelParamKWArgs = lambda: {
 
 Dataset = musdb18
 DatasetParam = musdb18.MUSDB18Param
-DatasetParamKWArgs = lambda: {}
+DatasetParamKWArgs = lambda: {
+    "dataset_root": _FLAGS.dataset_root,
+    "batch_size": _FLAGS.batch_size,
+    "sample_length": _FLAGS.input_length,
+    "validation_split": _FLAGS.validation_split,
+}
 
 _FLAGS = flags.FLAGS
 _CONFIG_FILENAME = "config.json"
@@ -156,7 +161,7 @@ def prepare_dataset(
     if not dataset_root.exists():
         raise FileNotFoundError("no such directory: %s" % dataset_root)
     else:
-        ...
+        return Dataset.make_dataset(dataset_param, mode)
 
 
 @beartype
@@ -165,15 +170,15 @@ def prepare_callbacks(
     callback_list: List[callbacks.Callback] = [],
     mode: Literal["train", "test"] = "train",
 ) -> List[callbacks.Callback]:
-    callback_list = callback_list[::].append(callbacks.TerminateOnNaN())
+    callback_list = callback_list.append(callbacks.TerminateOnNaN())
     if mode == "train":
         callback_list.extend(
             [
                 callbacks.CSVLogger(path / _CSVLOG_FILENAME, append=True),
                 keras.callbacks.ModelCheckpoint(
                     filepath=path / "{epoch:05d}.ckpt",
-                    monitor="loss",
                     verbose=1,
+                    save_weigthts_only=True,
                 ),
             ]
         )

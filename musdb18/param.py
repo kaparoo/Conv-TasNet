@@ -16,8 +16,8 @@ __all__ = ["load_param", "make_param", "MUSDB18Param"]
 @dataclass
 class MUSDB18Param:
     dataset_root: str
-    num_batches: int = 200
-    batch_size: int = 400
+    num_batches: int = 400
+    batch_size: int = 32
     sample_length: int = 2048
     validation_split: float = 0.0
 
@@ -30,8 +30,8 @@ def load_param(path: Union[str, PathLike, Path]) -> MUSDB18Param:
 @beartype
 def make_param(
     dataset_root: str,
-    num_batches: int = 200,
-    batch_size: int = 400,
+    num_batches: int = 400,
+    batch_size: int = 32,
     sample_length: int = 2048,
     validation_split: float = 0.0,
 ) -> MUSDB18Param:
