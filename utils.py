@@ -66,6 +66,8 @@ def define_flags(mode: Literal["train", "test"] = "train"):
         flags.DEFINE_integer(
             "num_epochs", 3, "Number of epochs", lower_bound=0, upper_bound=99999
         )
+    else:  # mode == "test"
+        flags.DEFINE_integer("checkpoint_idx", 0, "", lower_bound=0)
     Model.define_flags()
     Dataset.define_flags()
 
@@ -111,7 +113,7 @@ def prepare_model(checkpoint_dir: Path) -> Tuple[keras.Model, int]:
 @beartype
 def load_model(
     checkpoint_dir: Path, checkpoint_idx: Optional[int] = None
-) -> Tuple[keras.Model, ModelParam]:
+) -> keras.Model:
     if not checkpoint_dir.exists():
         raise FileNotFoundError("no such directory: %s" % checkpoint_dir)
     elif not checkpoint_dir.is_dir():
@@ -129,7 +131,7 @@ def load_model(
                     latest_checkpoint = checkpoint.with_suffix("")
                     model = Model.make_model(model_param)
                     model.load_weights(latest_checkpoint)
-                    return model, model_param
+                    return model
             else:
                 raise FileNotFoundError("no *.ckpt file: %s" % checkpoint_dir)
 
