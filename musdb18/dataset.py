@@ -29,8 +29,8 @@ class MUSDB18Provider(object):
 
         root = param.dataset_root
         if subset == "train" and param.validation_split > 0.0:
-            self.tracks = list(musdb.DB(root, subsets="train", splits="train"))
-            self.valids = list(musdb.DB(root, subsets="train", splits="valid"))
+            self.tracks = list(musdb.DB(root, subsets="train", split="train"))
+            self.valids = list(musdb.DB(root, subsets="train", split="valid"))
         else:
             self.tracks = list(musdb.DB(root, subsets=subset))
             self.valids = list()
