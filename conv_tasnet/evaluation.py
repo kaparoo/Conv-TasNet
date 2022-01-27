@@ -58,7 +58,7 @@ class SDRMetric(keras.metrics.Metric):
         self.scale_invariant = scale_invariant
         self.sdr = self.add_weight(name="sdr", initializer="zeros")
 
-    def update_state(self, s_true: tf.Tensor, s_pred: tf.Tensor):
+    def update_state(self, s_true: tf.Tensor, s_pred: tf.Tensor, sample_weight=None):
         self.sdr.assign_add(
             tf.reduce_mean(calc_sdr(s_true, s_pred, self.scale_invariant))
         )

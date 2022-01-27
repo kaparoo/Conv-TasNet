@@ -67,7 +67,12 @@ def define_flags(mode: Literal["train", "test"] = "train"):
             "num_epochs", 3, "Number of epochs", lower_bound=0, upper_bound=99999
         )
     else:  # mode == "test"
-        flags.DEFINE_integer("checkpoint_idx", 0, "", lower_bound=0)
+        flags.DEFINE_integer(
+            "checkpoint_idx",
+            0,
+            "Index of checkpoint for evaluation",
+            lower_bound=0,
+        )
     Model.define_flags()
     Dataset.define_flags()
 
@@ -172,7 +177,7 @@ def prepare_callbacks(
     callback_list: List[callbacks.Callback] = [],
     mode: Literal["train", "test"] = "train",
 ) -> List[callbacks.Callback]:
-    callback_list = callback_list.append(callbacks.TerminateOnNaN())
+    callback_list.append(callbacks.TerminateOnNaN())
     if mode == "train":
         callback_list.extend(
             [
